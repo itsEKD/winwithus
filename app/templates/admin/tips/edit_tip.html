@@ -26,9 +26,12 @@
       </div>
 
       <div class="mb-3">
-        {{ form.match_date.label(class="form-label") }}
-        {{ form.match_date(class="form-control") }}
-        <small class="form-text text-muted">Format: YYYY-MM-DD HH:MM</small>
+        <input type="datetime-local"
+               name="match_date"
+               class="form-control"
+               value="{{ tip.match_date.strftime('%Y-%m-%dT%H:%M') if tip.match_date else '' }}"
+               required>
+        <small class="form-text text-muted">Pick date & time (browser-friendly)</small>
       </div>
 
       <div class="mb-3">

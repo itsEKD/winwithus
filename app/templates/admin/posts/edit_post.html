@@ -1,0 +1,31 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h3 class="mb-4">Edit Blog Post - {{ form.title.data }}</h3>
+    <form method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.title.label(class="form-label") }}
+        {{ form.title(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.content.label(class="form-label") }}
+        {{ form.content(class="form-control", rows=6) }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.image.label(class="form-label") }}
+        {{ form.image(class="form-control") }}
+        <div class="form-text">Leave blank to keep existing image.</div>
+      </div>
+
+      <div class="mb-3">
+        {{ form.submit(class="btn btn-success") }}
+        <a href="{{ url_for('admin.manage_posts') }}" class="btn btn-secondary ms-2">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

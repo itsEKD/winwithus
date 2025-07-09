@@ -13,12 +13,10 @@
     html, body {
       height: 100%;
     }
-
     body {
       display: flex;
       flex-direction: column;
     }
-
     main {
       flex: 1;
     }
@@ -39,12 +37,22 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
           </li>
+
           {% if current_user.is_authenticated %}
             {% if current_user.is_admin %}
               <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">Admin</a>
+                <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a>
+              </li>
+            {% elif current_user.role == 'tipster' %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.tipster_dashboard') }}">Tipster Dashboard</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.home') }}">My Account</a>
               </li>
             {% endif %}
+
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
             </li>
@@ -81,7 +89,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-dark text-light py-3">
+  <footer class="bg-dark text-light py-3 mt-auto">
     <div class="container text-center">
       &copy; {{ current_year or 2025 }} WinWithUs. All rights reserved.<br>
       <small>Developed by @ekddevelopers</small>

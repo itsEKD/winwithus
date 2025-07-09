@@ -46,3 +46,8 @@ class Tip:
     @staticmethod
     def delete(mongo, tip_id):
         mongo.db.tips.delete_one({"_id": ObjectId(tip_id)})
+    @staticmethod
+    def get_by_tipster_id(mongo, tipster_id):
+        tips = mongo.db.tips.find({'posted_by': tipster_id}).sort('created_at', -1)
+        return [Tip(tip) for tip in tips]
+

@@ -7,8 +7,9 @@ from app.forms.post_form import PostForm
 from app.models.tip import Tip
 from datetime import datetime
 from app.models import Post
+import uuid, os 
 
-
+UPLOAD_FOLDER = 'app/static/uploads/posts'
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -26,6 +27,21 @@ def admin_required(func):
 @admin_required
 def admin_dashboard():
     return render_template('admin/dashboard.html', title="Admin Dashboard")
+
+@admin_bp.route('/tipster/dashboard')
+@login_required
+def tipster_dashboard():
+    if current_user.role != 'tipster':
+        flash("Access denied: Tipsters only.", "danger")
+        return redirect(url_for('main.home'))
+
+    # Get all tips posted by the current tipster
+    tips_cursor = mongo.db.tips.find({'tipster_id': str(current_user.id)}).sort('created_at', -1)
+    tips = [Tip(tip) for tip in tips_cursor]
+
+    return render_template('admin/tipster_dashboard.html', tips=tips, title="Tipster Dashboard")
+
+
 @admin_bp.route('/users')
 @login_required
 def manage_users():
@@ -85,6 +101,7 @@ def update_user_role(user_id):
 
 
 
+
 from flask import request
 from datetime import datetime
 
@@ -98,13 +115,12 @@ def create_tip():
     form = TipForm()
 
     if request.method == 'POST':
-        if form.validate():
-            match_date_str = request.form.get('match_date')
-
+        if form.validate_on_submit():
+            match_date_str = request.form.get("match_date")  # from raw input
             try:
-                match_date = datetime.strptime(match_date_str, "%Y-%m-%dT%H:%M")
+                match_date = datetime.strptime(match_date_str, '%Y-%m-%dT%H:%M')
             except (ValueError, TypeError):
-                flash("Invalid date format. Please use the datetime picker.", "danger")
+                flash("Invalid match date format.", "danger")
                 return render_template('admin/tips/create_tip.html', form=form, title="Post Tip")
 
             tip_data = {
@@ -115,17 +131,16 @@ def create_tip():
                 'match_date': match_date,
                 'posted_by': current_user.id,
                 'tipster_name': current_user.username,
-                'created_at': datetime.utcnow()
+                'created_at': datetime.utcnow(),
+                'tipster_id': str(current_user.id)
             }
-
             tip = Tip(tip_data)
             tip.save(mongo)
             flash("Betting tip posted!", "success")
-            return redirect(url_for('admin.manage_tips'))
-        else:
-            flash("Please correct the errors in the form.", "danger")
+            return redirect(url_for('admin.tipster_dashboard'))
 
     return render_template('admin/tips/create_tip.html', form=form, title="Post Tip")
+
 
 
 @admin_bp.route('/tips', methods=['GET'])
@@ -135,8 +150,15 @@ def manage_tips():
         flash("Access denied.", "danger")
         return redirect(url_for('main.home'))
 
-    tips = Tip.get_all(mongo)  # Pass mongo as argument
+    if current_user.is_admin:
+        tips = Tip.get_all(mongo)  # All tips
+    else:
+        # Only tips by this tipster
+        tips = mongo.db.tips.find({'posted_by': current_user.id}).sort('created_at', -1)
+        tips = [Tip(tip) for tip in tips]
+
     return render_template('admin/tips/manage_tips.html', tips=tips, title="Manage Betting Tips")
+
 
 @admin_bp.route('/tips/<tip_id>/delete', methods=['POST'])
 @login_required
@@ -145,9 +167,20 @@ def delete_tip(tip_id):
         flash("Access denied.", "danger")
         return redirect(url_for('main.home'))
 
-    Tip.delete(tip_id)
+    # Only allow deletion of tips the user owns (if not admin)
+    if not current_user.is_admin:
+        tip = Tip.get_by_id(mongo, tip_id)
+        if not tip or str(tip.posted_by) != str(current_user.id):
+            flash("You are not authorized to delete this tip.", "danger")
+            return redirect(url_for('admin.manage_tips'))
+
+    Tip.delete(tip_id, mongo)  # 🛠 Pass mongo explicitly
     flash("Tip deleted successfully.", "success")
     return redirect(url_for('admin.manage_tips'))
+
+
+
+
 @admin_bp.route('/tips/<tip_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_tip(tip_id):
@@ -156,7 +189,6 @@ def edit_tip(tip_id):
         flash("Tip not found.", "warning")
         return redirect(url_for('admin.manage_tips'))
 
-    # Only allow the tip owner or admin to edit
     if not current_user.is_admin and str(current_user.id) != tip.tipster_id:
         flash("You are not authorized to edit this tip.", "danger")
         return redirect(url_for('main.home'))
@@ -168,22 +200,28 @@ def edit_tip(tip_id):
         form.description.data = tip.description
         form.odds.data = tip.odds
         form.sport.data = tip.sport
-        form.match_date.data = tip.match_date
 
     if form.validate_on_submit():
+        # Parse datetime-local field from raw form input
+        raw_match_date = request.form.get("match_date")
+        try:
+            match_date = datetime.strptime(raw_match_date, "%Y-%m-%dT%H:%M")
+        except (ValueError, TypeError):
+            flash("Invalid date format. Please use the datetime picker.", "danger")
+            return render_template('admin/tips/edit_tip.html', form=form, tip=tip, title="Edit Tip")
+
         updates = {
             'title': form.title.data,
             'description': form.description.data,
             'odds': form.odds.data,
             'sport': form.sport.data,
-            'match_date': form.match_date.data
+            'match_date': match_date
         }
         Tip.update(mongo, tip_id, updates)
         flash("Tip updated successfully.", "success")
         return redirect(url_for('admin.manage_tips'))
 
     return render_template('admin/tips/edit_tip.html', form=form, tip=tip, title="Edit Tip")
-
 
 @admin_bp.route('/admin/posts')
 @login_required
@@ -196,48 +234,63 @@ def manage_posts():
     return render_template('admin/manage_posts.html', posts=posts, title="Manage Blog Posts")
 
 
-@admin_bp.route('/admin/posts/new', methods=['GET', 'POST'])
+# CREATE POST
+@admin_bp.route('/posts/new', methods=['GET', 'POST'])
 @login_required
 def create_post():
-    if not current_user.is_admin:
-        abort(403)
-
     form = PostForm()
     if form.validate_on_submit():
-        new_post = {
-            'title': form.title.data,
-            'content': form.content.data,
-            'author': current_user.username,
-            'created_at': datetime.utcnow()
+        filename = None
+        if form.image.data:
+            ext = os.path.splitext(form.image.data.filename)[1]
+            filename = f"{uuid.uuid4().hex}{ext}"
+            form.image.data.save(os.path.join(UPLOAD_FOLDER, filename))
+
+        post_data = {
+            "title": form.title.data,
+            "content": form.content.data,
+            "author": current_user.username,
+            "created_at": None,
+            "image_filename": filename
         }
-        mongo.db.posts.insert_one(new_post)
-        flash('Post created successfully.', 'success')
+        post = Post(post_data)
+        post.save(mongo)
+        flash("Post published successfully.", "success")
         return redirect(url_for('admin.manage_posts'))
-    
-    return render_template('admin/post_form.html', form=form, title="Create Post")
 
+    return render_template('admin/posts/create_post.html', form=form, title="New Blog Post")
 
-@admin_bp.route('/admin/posts/<post_id>/edit', methods=['GET', 'POST'])
+# EDIT POST
+@admin_bp.route('/posts/<post_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_post(post_id):
-    if not current_user.is_admin:
-        abort(403)
-
-    post = mongo.db.posts.find_one({'_id': ObjectId(post_id)})
+    post = Post.get_by_id(post_id, mongo)
     if not post:
-        abort(404)
-
-    form = PostForm(data=post)
-    if form.validate_on_submit():
-        updated_data = {
-            'title': form.title.data,
-            'content': form.content.data,
-        }
-        mongo.db.posts.update_one({'_id': ObjectId(post_id)}, {'$set': updated_data})
-        flash('Post updated successfully.', 'success')
+        flash("Post not found.", "warning")
         return redirect(url_for('admin.manage_posts'))
 
-    return render_template('admin/post_form.html', form=form, title="Edit Post")
+    form = PostForm()
+    if request.method == 'GET':
+        form.title.data = post.title
+        form.content.data = post.content
+
+    if form.validate_on_submit():
+        updates = {
+            "title": form.title.data,
+            "content": form.content.data,
+        }
+
+        if form.image.data:
+            ext = os.path.splitext(form.image.data.filename)[1]
+            filename = f"{uuid.uuid4().hex}{ext}"
+            form.image.data.save(os.path.join(UPLOAD_FOLDER, filename))
+            updates['image_filename'] = filename
+
+        Post.update(post_id, updates, mongo)
+        flash("Post updated.", "success")
+        return redirect(url_for('admin.manage_posts'))
+
+    return render_template('admin/posts/edit_post.html', form=form, post=post, title="Edit Blog Post")
 
 @admin_bp.route('/admin/posts/<post_id>/delete', methods=['POST'])
 @login_required

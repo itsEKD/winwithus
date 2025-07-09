@@ -26,10 +26,11 @@
       </div>
 
       <div class="mb-3">
-        {{ form.match_date.label(class="form-label") }}
+        <label for="match_date" class="form-label">Match Date & Time</label>
         <input type="datetime-local" name="match_date" class="form-control" required>
         <small class="form-text text-muted">Pick date & time (browser-friendly)</small>
-        </div>
+      </div>
+
 
       <div class="mb-3">
         {{ form.submit(class="btn btn-primary") }}
