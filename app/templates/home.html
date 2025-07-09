@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <div class="text-center mb-4">
+    <h1 class="display-5 fw-bold">🏆 Welcome to WinWithUs</h1>
+    <p class="lead">Your trusted source for expert sports betting tips and real-time odds.</p>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <!-- Featured Tip (still static for now) -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          ⭐ Featured Tip of the Day
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Manchester United vs Liverpool</h5>
+          <p class="card-text">Tip: Both teams to score ✅</p>
+          <p class="card-text text-muted">Confidence: 8/10</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest Tips (from DB) -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">
+          📈 Latest Betting Tips
+        </div>
+        <ul class="list-group list-group-flush">
+          {% if tips %}
+            {% for tip in tips %}
+              <li class="list-group-item">
+                <strong>{{ tip.title }}</strong> – 
+                {{ tip.sport }} –
+                Odds: <span class="text-success">{{ tip.odds }}</span><br>
+                <small class="text-muted">
+                  Match: {{ tip.match_date.strftime('%Y-%m-%d') if tip.match_date else 'N/A' }}
+                </small>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-group-item text-muted">No tips available.</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog Posts -->
+  <div class="mt-5">
+    <h3>📰 Latest Articles</h3>
+    {% if posts %}
+      {% for post in posts %}
+        <div class="card mb-3 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">{{ post.title }}</h5>
+            <p class="card-text">{{ post.content[:200] }}...</p>
+            <p class="text-muted small">By {{ post.author }} • {{ post.created_at.strftime('%b %d, %Y') }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">No blog posts yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Static Odds Table -->
+  <div class="card mt-4 shadow">
+    <div class="card-header bg-dark text-white">
+      🔢 Live Odds Sample (Static)
+    </div>
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Match</th>
+          <th>Tip</th>
+          <th>Odds</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PSG vs Marseille</td>
+          <td>PSG to Win</td>
+          <td>1.80</td>
+        </tr>
+        <tr>
+          <td>Inter vs Napoli</td>
+          <td>Draw</td>
+          <td>3.20</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

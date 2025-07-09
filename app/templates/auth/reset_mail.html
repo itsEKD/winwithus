@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Reset Your Password - WinWithUs</title>
+    <style>
+      .button {
+        display: inline-block;
+        padding: 12px 20px;
+        background-color: #dc3545;
+        color: white !important;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+      .button:hover {
+        background-color: #a71d2a;
+      }
+    </style>
+  </head>
+  <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2>WinWithUs Password Reset</h2>
+
+    <p>We received a request to reset your password. Click the button below to choose a new one:</p>
+
+    <p>
+      <a href="{{ reset_url }}" class="button">Reset My Password</a>
+    </p>
+
+    <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+    <p><a href="{{ reset_url }}">{{ reset_url }}</a></p>
+
+    <hr>
+    <p style="font-size: 0.9em; color: #555;">If you did not request this password reset, you can safely ignore this email.</p>
+  </body>
+</html>

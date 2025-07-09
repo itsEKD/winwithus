@@ -1,0 +1,40 @@
+{% extends 'admin/admin_base.html' %}
+{% block content %}
+  <div class="container">
+    <h3 class="mb-4">Edit Tip - {{ tip.title }}</h3>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.title.label(class="form-label") }}
+        {{ form.title(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(class="form-control", rows=4) }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.odds.label(class="form-label") }}
+        {{ form.odds(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.sport.label(class="form-label") }}
+        {{ form.sport(class="form-select") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.match_date.label(class="form-label") }}
+        {{ form.match_date(class="form-control") }}
+        <small class="form-text text-muted">Format: YYYY-MM-DD HH:MM</small>
+      </div>
+
+      <div class="mb-3">
+        {{ form.submit(class="btn btn-success") }}
+        <a href="{{ url_for('admin.manage_tips') }}" class="btn btn-secondary ms-2">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title or 'Admin Panel - WinWithUs' }}</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+    .sidebar {
+      min-height: 100vh;
+      background-color: #343a40;
+      padding-top: 1rem;
+    }
+    .sidebar a {
+      color: #ffffff;
+      padding: 12px 20px;
+      display: block;
+      text-decoration: none;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+      background-color: #495057;
+      color: #ffffff;
+    }
+    .sidebar h4 {
+      font-size: 1.3rem;
+      border-bottom: 1px solid #6c757d;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+
+      <!-- Sidebar -->
+      <nav class="col-md-3 col-lg-2 sidebar">
+        <h4 class="text-white text-center">Admin Panel</h4>
+        <a href="{{ url_for('admin.admin_dashboard') }}"
+           class="{% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">
+           Dashboard
+        </a>
+        <a href="{{ url_for('admin.manage_posts') }}"
+           class="{% if request.endpoint == 'admin.manage_posts' %}active{% endif %}">
+           Manage Blog Posts
+        </a>
+        <a href="{{ url_for('admin.manage_tips') }}"
+           class="{% if request.endpoint == 'admin.manage_tips' %}active{% endif %}">
+           Manage Betting Tips
+        </a>
+        <a href="{{ url_for('admin.manage_users') }}"
+           class="{% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
+           Users
+        </a>
+        <a href="#" class="disabled">Comments</a>
+        <a href="{{ url_for('main.home') }}">← Back to Site</a>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="col-md-9 col-lg-10 p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+  <h2 class="mb-4 text-center">Set a New Password</h2>
+
+  <form method="POST" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.password.label(class="form-label") }}
+      {{ form.password(class="form-control", placeholder="Enter new password") }}
+      {% for error in form.password.errors %}
+        <div class="text-danger small">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.confirm_password.label(class="form-label") }}
+      {{ form.confirm_password(class="form-control", placeholder="Confirm new password") }}
+      {% for error in form.confirm_password.errors %}
+        <div class="text-danger small">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="d-grid gap-2">
+      {{ form.submit(class="btn btn-success btn-block") }}
+    </div>
+
+    <hr class="my-4">
+    <p class="text-center">
+      <a href="{{ url_for('auth.login') }}">Back to login</a>
+    </p>
+  </form>
+</div>
+{% endblock %}
