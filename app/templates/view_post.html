@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    
+    <!-- Sidebar: Other Posts -->
+    <div class="col-md-4 mb-4">
+      <h5 class="border-bottom pb-2">📰 Other Articles</h5>
+      {% if other_posts %}
+        <ul class="list-group list-group-flush">
+          {% for other in other_posts %}
+            {% if other._id != post._id %}
+              <li class="list-group-item">
+                <a href="{{ url_for('main.view_post', post_id=other._id) }}" class="text-decoration-none">
+                  {{ other.title }}
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">No other posts.</p>
+      {% endif %}
+    </div>
+
+    <!-- Main Post Content -->
+    <div class="col-md-8">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="card-title">{{ post.title }}</h2>
+          <p class="text-muted mb-2">
+            <small>By {{ post.author }} • {{ post.created_at.strftime('%b %d, %Y') }}</small>
+          </p>
+          <hr>
+          <div class="card-text">
+            {{ post.content|safe }}
+          </div>
+        </div>
+      </div>
+
+      <a href="{{ url_for('main.blogs') }}" class="btn btn-outline-secondary">
+        ← Back to Blogs
+      </a>
+    </div>
+    
+  </div>
+</div>
+{% endblock %}

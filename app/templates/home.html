@@ -1,101 +1,190 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
+<style>
+  .hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)),
+                url("{{ url_for('static', filename='images/hero-bg.jpg') }}") no-repeat center center;
+    background-size: cover;
+    color: white;
+    padding: 5rem 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  }
 
-  <div class="text-center mb-4">
-    <h1 class="display-5 fw-bold">🏆 Welcome to WinWithUs</h1>
-    <p class="lead">Your trusted source for expert sports betting tips and real-time odds.</p>
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+  }
+
+  .hero p {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .blog-link {
+    text-decoration: none;
+  }
+
+  .blog-link:hover {
+    text-decoration: underline;
+    color: #0d6efd;
+  }
+
+  .card-header {
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: 1.8rem;
+    }
+
+    .hero p {
+      font-size: 1rem;
+    }
+
+    .btn-lg {
+      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+    }
+  }
+</style>
+
+<div class="container-fluid px-4">
+
+  <!-- Hero Banner -->
+  <div class="hero mb-5">
+    <h1 class="mb-3">🏆 WinWithUs: Free & Premium Sports Betting Tips</h1>
+    <p>Boost your chances with expert insights, daily predictions, and top-tier bet slips.</p>
+    <div class="mt-3">
+      {% if not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg me-2">Join Free</a>
+      {% endif %}
+      <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">Subscribe for Premium Tips</a>
+      <a href="{{ url_for('main.blogs') }}" class="btn btn-outline-light btn-lg">Explore Blogs</a>
+    </div>
   </div>
-
-  <hr>
 
   <div class="row">
-    <!-- Featured Tip (still static for now) -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          ⭐ Featured Tip of the Day
-        </div>
-        <div class="card-body">
-          <h5 class="card-title">Manchester United vs Liverpool</h5>
-          <p class="card-text">Tip: Both teams to score ✅</p>
-          <p class="card-text text-muted">Confidence: 8/10</p>
-        </div>
-      </div>
+    <!-- Left Sidebar: Articles & Blogs -->
+    <div class="col-lg-4 mb-5">
+      <h5 class="section-title">📰 Latest Articles</h5>
+      {% if posts %}
+        {% for post in posts %}
+          <div class="mb-3">
+            <a href="{{ url_for('main.view_post', post_id=post._id) }}" class="blog-link">
+              <strong>{{ post.title }}</strong><br>
+              <small class="text-muted">{{ post.created_at.strftime('%b %d, %Y') }}</small>
+            </a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No articles available.</p>
+      {% endif %}
+
+      <h5 class="section-title mt-4">🧠 Betting Insights</h5>
+      <ul class="list-unstyled">
+        <li>✔ Proven strategies from top tipsters</li>
+        <li>✔ Learn to manage bankroll & odds</li>
+      </ul>
     </div>
 
-    <!-- Latest Tips (from DB) -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header bg-success text-white">
-          📈 Latest Betting Tips
-        </div>
-        <ul class="list-group list-group-flush">
-          {% if tips %}
-            {% for tip in tips %}
-              <li class="list-group-item">
-                <strong>{{ tip.title }}</strong> – 
-                {{ tip.sport }} –
-                Odds: <span class="text-success">{{ tip.odds }}</span><br>
-                <small class="text-muted">
-                  Match: {{ tip.match_date.strftime('%Y-%m-%d') if tip.match_date else 'N/A' }}
-                </small>
-              </li>
-            {% endfor %}
-          {% else %}
-            <li class="list-group-item text-muted">No tips available.</li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- Blog Posts -->
-  <div class="mt-5">
-    <h3>📰 Latest Articles</h3>
-    {% if posts %}
-      {% for post in posts %}
-        <div class="card mb-3 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">{{ post.title }}</h5>
-            <p class="card-text">{{ post.content[:200] }}...</p>
-            <p class="text-muted small">By {{ post.author }} • {{ post.created_at.strftime('%b %d, %Y') }}</p>
+    <!-- Main Tips Area -->
+    <div class="col-lg-8">
+      <div class="row g-4">
+        <!-- Featured Tip -->
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+              ⭐ Featured Tip of the Day
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Manchester United vs Liverpool</h5>
+              <p class="card-text">Tip: Both Teams to Score ✅</p>
+              <small class="text-muted">Confidence: 8/10</small>
+            </div>
           </div>
         </div>
-      {% endfor %}
-    {% else %}
-      <p class="text-muted">No blog posts yet.</p>
-    {% endif %}
-  </div>
 
-  <!-- Static Odds Table -->
-  <div class="card mt-4 shadow">
-    <div class="card-header bg-dark text-white">
-      🔢 Live Odds Sample (Static)
-    </div>
-    <table class="table table-striped mb-0">
-      <thead>
-        <tr>
-          <th>Match</th>
-          <th>Tip</th>
-          <th>Odds</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>PSG vs Marseille</td>
-          <td>PSG to Win</td>
-          <td>1.80</td>
-        </tr>
-        <tr>
-          <td>Inter vs Napoli</td>
-          <td>Draw</td>
-          <td>3.20</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+        <!-- Free Tips -->
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+              🎯 Free Predictions
+            </div>
+            <ul class="list-group list-group-flush">
+              {% if tips %}
+                {% for tip in tips[:3] %}
+                  <li class="list-group-item">
+                    <strong>{{ tip.title }}</strong> – 
+                    {{ tip.sport }} | 
+                    Odds: <span class="text-success">{{ tip.odds }}</span><br>
+                    <small>{{ tip.match_date.strftime('%Y-%m-%d') if tip.match_date else 'N/A' }}</small>
+                  </li>
+                {% endfor %}
+              {% else %}
+                <li class="list-group-item text-muted">No free tips available.</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
 
+        <!-- Premium Tips -->
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+              🔒 Premium Bet Tips
+            </div>
+            <div class="card-body">
+              <p>🔥 Premium tips win 82% of the time!</p>
+              <p>👉 Subscribe now to unlock exclusive slips from top tipsters.</p>
+              <a href="{{ url_for('auth.register') }}" class="btn btn-dark btn-sm">Subscribe Now</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Static Odds Table -->
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+              📊 Sample Odds (Static)
+            </div>
+            <table class="table table-striped mb-0">
+              <thead>
+                <tr>
+                  <th>Match</th>
+                  <th>Tip</th>
+                  <th>Odds</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PSG vs Marseille</td>
+                  <td>PSG to Win</td>
+                  <td>1.80</td>
+                </tr>
+                <tr>
+                  <td>Inter vs Napoli</td>
+                  <td>Draw</td>
+                  <td>3.20</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div> <!-- row -->
+    </div> <!-- col-lg-8 -->
+  </div> <!-- row -->
 </div>
 {% endblock %}

@@ -1,0 +1,25 @@
+<a href="{{ url_for('admin.admin_dashboard') }}"
+   class="{% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">
+   <i class="bi bi-speedometer2"></i> Dashboard
+</a>
+
+<a href="{{ url_for('admin.manage_posts') }}"
+   class="{% if request.endpoint == 'admin.manage_posts' %}active{% endif %}">
+   <i class="bi bi-journal-text"></i> Manage Blog Posts
+</a>
+
+<a href="{{ url_for('admin.manage_tips') }}"
+   class="{% if request.endpoint == 'admin.manage_tips' %}active{% endif %}">
+   <i class="bi bi-lightning-charge"></i> Manage Betting Tips
+</a>
+
+<a href="{{ url_for('admin.manage_users') }}"
+   class="{% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
+   <i class="bi bi-people"></i> Manage Users
+</a>
+
+<a href="#" class="disabled"><i class="bi bi-chat-dots"></i> Comments (soon)</a>
+
+<a href="{{ url_for('main.home') }}">
+  <i class="bi bi-box-arrow-left"></i> Back to Site
+</a>

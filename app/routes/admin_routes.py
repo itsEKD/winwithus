@@ -26,7 +26,21 @@ def admin_required(func):
 @admin_bp.route('/')
 @admin_required
 def admin_dashboard():
-    return render_template('admin/dashboard.html', title="Admin Dashboard")
+    # Counts for dashboard tiles
+    user_count = mongo.db.users.count_documents({})
+    tip_count = mongo.db.tips.count_documents({})
+    post_count = mongo.db.posts.count_documents({})
+    tipster_count = mongo.db.users.count_documents({'role': 'tipster'})
+
+    return render_template(
+        'admin/dashboard.html',
+        title="Admin Dashboard",
+        user_count=user_count,
+        tip_count=tip_count,
+        post_count=post_count,
+        tipster_count=tipster_count
+    )
+
 
 @admin_bp.route('/tipster/dashboard')
 @login_required
