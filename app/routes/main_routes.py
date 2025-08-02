@@ -9,20 +9,27 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def home():
+    # Get latest tips
     latest_tips = mongo.db.tips.find().sort("created_at", -1).limit(5)
     tips = [Tip(tip) for tip in latest_tips]
 
+    # Get latest posts
     latest_posts = mongo.db.posts.find().sort("created_at", -1).limit(5)
     posts = [Post(p) for p in latest_posts]
 
-    return render_template("home.html", tips=tips, posts=posts)
+    # Get latest Odibets odds
+    odibets_odds_cursor = mongo.db.odibets_odds.find().sort("time", -1).limit(10)
+    odds = list(odibets_odds_cursor)
+
+    return render_template("home.html", tips=tips, posts=posts, odds=odds)
+
 
 @main_bp.route('/blogs')
 def blogs():
     posts = Post.get_all(mongo)
     return render_template('blogs.html', posts=posts, title="Blog Posts")
 
-@main_bp.route('/posts/<post_id>')
+@main_bp.route('/post/<string:post_id>')
 def view_post(post_id):
     post = Post.get_by_id(mongo, post_id)
     if not post:

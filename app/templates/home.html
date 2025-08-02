@@ -82,7 +82,7 @@
       {% if posts %}
         {% for post in posts %}
           <div class="mb-3">
-            <a href="{{ url_for('main.view_post', post_id=post._id) }}" class="blog-link">
+            <a href="{{ url_for('main.view_post', post_id=post._id.__str__()) }}" class="text-decoration-none">
               <strong>{{ post.title }}</strong><br>
               <small class="text-muted">{{ post.created_at.strftime('%b %d, %Y') }}</small>
             </a>
@@ -91,6 +91,7 @@
       {% else %}
         <p class="text-muted">No articles available.</p>
       {% endif %}
+
 
       <h5 class="section-title mt-4">🧠 Betting Insights</h5>
       <ul class="list-unstyled">
@@ -153,11 +154,11 @@
           </div>
         </div>
 
-        <!-- Static Odds Table -->
+        <!-- Dynamic Odds Table from Odibets -->
         <div class="col-12">
           <div class="card shadow-sm">
             <div class="card-header bg-dark text-white">
-              📊 Sample Odds (Static)
+              ⚡ Live Odds from Odibets
             </div>
             <table class="table table-striped mb-0">
               <thead>
@@ -168,20 +169,25 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>PSG vs Marseille</td>
-                  <td>PSG to Win</td>
-                  <td>1.80</td>
-                </tr>
-                <tr>
-                  <td>Inter vs Napoli</td>
-                  <td>Draw</td>
-                  <td>3.20</td>
-                </tr>
+                {% for game in odds %}
+                  {% for market in game.markets %}
+                    <tr>
+                      <td>{{ game.match }}</td>
+                      <td>{{ market.option }}</td>
+                      <td>{{ market.odd }}</td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="3">No odds available at the moment.</td>
+                  </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
         </div>
+
+
 
       </div> <!-- row -->
     </div> <!-- col-lg-8 -->
